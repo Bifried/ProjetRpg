@@ -1,9 +1,10 @@
 from pygame import mixer
 from random import randint
+import credits
 import pygame
 from Battle import Fighter
 
-def bossfight(hero=None):
+def second_fight(hero=None):
     import rpg
 
     pygame.init()
@@ -28,7 +29,7 @@ def bossfight(hero=None):
     target = None #Cible lors d'une attaque (peux servir également lorsque l'on voudra mettre plusieurs ennemis)
     special = False
     hero_mana_restored = 10
-    boss_mana_restored = 20
+    enemy2_mana_restored = 20
     game_over = 0 #Variable pour la condition de fin du combat
 
 #Variables pour la police de texte et les deux couleurs principalement utilisé lors du combat (pour le text et les barres de vie)
@@ -40,17 +41,18 @@ def bossfight(hero=None):
 
 #Sons que l'ont veux utiliser
     hero_hurt_snd = pygame.mixer.Sound('audio/herohurt.wav')
-    boss_hurt_snd = pygame.mixer.Sound('audio/alienhurt.wav')
+    enemy2_hurt_snd = pygame.mixer.Sound('audio/alienhurt.wav')
     hero_atk_snd = pygame.mixer.Sound('audio/swordslashsound.wav')
-    boss_atk_snd = pygame.mixer.Sound('audio/laserriflesound.wav')
+    enemy2_atk_snd = pygame.mixer.Sound('audio/lightsabersound.wav')
     healing_sound = pygame.mixer.Sound('audio/healingsound.wav')
-    boss_spec_sound1 = pygame.mixer.Sound('audio/energywavesound.wav')
+    enemy_spec_sound1 = pygame.mixer.Sound('audio/enemyspecial1.wav')
+    enemy_spec_sound2 = pygame.mixer.Sound('audio/enemyspecial2.wav')
     hero_spec_sound1 = pygame.mixer.Sound('audio/specialhero1.wav')
     hero_spec_sound2 = pygame.mixer.Sound('audio/specialhero2.wav')
 
 
 #Images que l'on veux utiliser
-    background_img = pygame.image.load('images/bossbattle.png').convert_alpha()
+    background_img = pygame.image.load('images/battle.png').convert_alpha()
 
     panel_img = pygame.image.load('images/panel1.png').convert_alpha()
    
@@ -122,13 +124,13 @@ def bossfight(hero=None):
     
 #variables de la classe fighters, le héro et l'ennemi
  #positionnement du personnage, son nom, ses hp, sa force, son nombre de potion et son lvl
-    boss = Fighter(-480, 283, 'Boss', 700, 40, 2, 25, 250, screen)
+    enemy2 = Fighter(-50, 85, 'Enemy2', 300, 25, 1, 15, 250, screen)
 
     if hero is None:
-        hero = Fighter(330, 260, 'Hero', 100, 16, 3, 5, 250, screen, boss)
+        hero = Fighter(330, 260, 'Hero', 100, 16, 3, 5, 250, screen, enemy2)
 
     hero.screen = screen
-    hero.enemy = boss
+    hero.enemy = enemy2
     hero.hp = hero.max_hp
     hero.mp = hero.max_mp
     hero.alive = True
@@ -138,9 +140,9 @@ def bossfight(hero=None):
     
 #variables de la classe barre de vie, la vie du héro et la vie de l'ennemi
     hero_health_bar = HealthBar(100, screen_height - bottom_panel + 45, hero.hp, hero.max_hp)
-    boss_health_bar = HealthBar(500, screen_height - bottom_panel + 45, boss.hp, boss.max_hp)
+    enemy2_health_bar = HealthBar(500, screen_height - bottom_panel + 45, enemy2.hp, enemy2.max_hp)
     hero_mana_bar = ManaBar(100, screen_height - bottom_panel + 70, hero.mp, hero.max_mp)
-    boss_mana_bar = ManaBar(500, screen_height - bottom_panel + 70, boss.mp, boss.max_mp)
+    enemy2_mana_bar = ManaBar(500, screen_height - bottom_panel + 70, enemy2.mp, enemy2.max_mp)
 
 #Fonction pour mettre du texte sur l'écran
     def draw_text(text, font, text_col, x, y):
@@ -153,11 +155,11 @@ def bossfight(hero=None):
     def draw_panel():
         screen.blit(panel_img, (0, screen_height - bottom_panel-19))
         draw_text(f'{hero.name} HP: {hero.hp}/{hero.max_hp}', font, black, 100, screen_height - bottom_panel -5) #Utilisation directe des attributs de la classe fighter pr définir les noms et la valeur des hp des personnages
-        draw_text(f'{boss.name} HP: {boss.hp}/{boss.max_hp}', font, black, 500, screen_height - bottom_panel -5)
+        draw_text(f'{enemy2.name} HP: {enemy2.hp}/{enemy2.max_hp}', font, black, 500, screen_height - bottom_panel -5)
         draw_text(f'Level: {hero.level}', font, black, 100, screen_height - bottom_panel + 15)
-        draw_text(f'Level: {boss.level}', font, black, 500, screen_height - bottom_panel + 15)
+        draw_text(f'Level: {enemy2.level}', font, black, 500, screen_height - bottom_panel + 15)
         draw_text(f'Mana: {hero.mp}/{hero.max_mp}', font, purple, 250, screen_height - bottom_panel + 15)
-        draw_text(f'Mana: {boss.mp}/{boss.max_mp}', font, purple, 650, screen_height - bottom_panel + 15)
+        draw_text(f'Mana: {enemy2.mp}/{enemy2.max_mp}', font, purple, 650, screen_height - bottom_panel + 15)
 #variable de la classe bouton
     potion_button = Button(100, screen_height - bottom_panel + 100, potion_img, 40, 40)
     special_button = Button(200,screen_height - bottom_panel + 100, special_img, 40, 40)
@@ -167,7 +169,7 @@ def bossfight(hero=None):
 
 #ajout musique
     mixer.init()
-    mixer.music.load("musiques/finalboss.mp3")
+    mixer.music.load("musiques/fight.mp3")
     mixer.music.play(loops=-1) #Pour que la musique se répète
 
     while run:
@@ -178,15 +180,15 @@ def bossfight(hero=None):
 
         draw_panel() #UI en bas
         hero_health_bar.draw(hero.hp)
-        boss_health_bar.draw(boss.hp)
+        enemy2_health_bar.draw(enemy2.hp)
         hero_mana_bar.draw(hero.mp)
-        boss_mana_bar.draw(boss.mp)
+        enemy2_mana_bar.draw(enemy2.mp)
 
-        hero.update("bossbattle")
+        hero.update()
         hero.draw() #Personnage joueur
 
-        boss.update("bossbattle")
-        boss.draw() #IA
+        enemy2.update()
+        enemy2.draw() #IA
         
         potion_button.draw() #Potions du joueur
         special_button.draw() #special du joueur
@@ -222,10 +224,10 @@ def bossfight(hero=None):
         pygame.mouse.set_visible(True)
 
 #Condition de clique lorsque l'on choisit d'attaquer un ennemi        
-        if boss.rect.collidepoint(pos) and potion_button.rect.collidepoint(pos) == False and special_button.rect.collidepoint(pos) == False:
-            if clicked == True and boss.alive == True:
+        if enemy2.rect.collidepoint(pos) and potion_button.rect.collidepoint(pos) == False and special_button.rect.collidepoint(pos) == False:
+            if clicked == True and enemy2.alive == True:
                 attack = True
-                target = boss
+                target = enemy2
 
 #Condition de clique lorsque l'ont choisit d'utiliser une potion       
         if potion_button.rect.collidepoint(pos):
@@ -249,10 +251,10 @@ def bossfight(hero=None):
                 if fighter_turn == 1:
                     action_cooldown += 1
                     if action_cooldown >= action_wait_time:
-                        if attack == True and target == boss:
+                        if attack == True and target == enemy2:
                             hero_atk_snd.play()
-                            hero.attack(boss)
-                            boss_hurt_snd.play()
+                            hero.attack(enemy2)
+                            enemy2_hurt_snd.play()
                             
                             if hero.mp < hero.max_mp and hero.mp + hero_mana_restored < hero.max_mp:
                                 hero.mp += hero_mana_restored
@@ -262,7 +264,7 @@ def bossfight(hero=None):
                             action_cooldown = 0
 
                         if potion == True: #Choix d'utiliser la potion + éviter que le heal soit supérieur aux hp max
-                            if hero.potions > 0  and boss.alive == True:
+                            if hero.potions > 0  and enemy2.alive == True:
                                 healing_sound.play()
                                 hero.heal()
                                 if hero.max_hp - hero.hp > potion_heal:
@@ -274,11 +276,11 @@ def bossfight(hero=None):
                                 fighter_turn += 1
                                 action_cooldown = 0
                         if special == True and hero.mp >= 250:
-                            hero.special(boss)
+                            hero.special(enemy2)
                             hero_atk_snd.play()
                             hero_spec_sound1.play()
                             hero_spec_sound2.play()
-                            boss_hurt_snd.play()
+                            enemy2_hurt_snd.play()
                             hero.mp -= 250
                             fighter_turn += 1
                             action_cooldown = -200
@@ -292,40 +294,41 @@ def bossfight(hero=None):
             
 #Action de L'IA qui joue après le joueur, se heal lorsqu'il passe à la moitié de ses pv                
             if fighter_turn == 2:
-                if boss.alive == True:
+                if enemy2.alive == True:
                     action_cooldown += 1
                     if action_cooldown >= action_wait_time:
-                        if (boss.hp / boss.max_hp) < 0.5 and boss.potions > 0:
+                        if (enemy2.hp / enemy2.max_hp) < 0.5 and enemy2.potions > 0:
                             healing_sound.play()
-                            boss.heal()
-                            if boss.max_hp - boss.hp > potion_heal:
+                            enemy2.heal()
+                            if enemy2.max_hp - enemy2.hp > potion_heal:
                                     heal_amount = potion_heal
                             else:
-                                heal_amount = boss.max_hp - boss.hp
-                            boss.hp += heal_amount
-                            boss.potions -=1
+                                heal_amount = enemy2.max_hp - enemy2.hp
+                            enemy2.hp += heal_amount
+                            enemy2.potions -=1
                             fighter_turn += 1
                             action_cooldown = 0
-                        elif (boss.hp / boss.max_hp) < 0.5 and boss.potions == 0 and boss.mp >= 250:
-                            boss_spec_sound1.play()
-                            boss.special(hero)
+                        elif (enemy2.hp / enemy2.max_hp) < 0.5 and enemy2.potions == 0 and enemy2.mp >= 250:
+                            enemy_spec_sound1.play()
+                            enemy_spec_sound2.play()
+                            enemy2.special(hero)
                             hero_hurt_snd.play()
-                            boss.mp -= 250
+                            enemy2.mp -= 250
                             fighter_turn += 1
                             action_cooldown = -200
                         else:
-                            boss_atk_snd.play()
-                            boss.attack(hero)
+                            enemy2_atk_snd.play()
+                            enemy2.attack(hero)
                             hero_hurt_snd.play()
                             fighter_turn += 1
                             action_cooldown = 0
 
-                            if boss.mp < boss.max_mp and boss.mp + boss_mana_restored < boss.max_mp:
-                                boss.mp += boss_mana_restored
+                            if enemy2.mp < enemy2.max_mp and enemy2.mp + enemy2_mana_restored < enemy2.max_mp:
+                                enemy2.mp += enemy2_mana_restored
                                 fighter_turn += 1
                                 action_cooldown = 0
                             else:
-                                boss.mp = boss.max_mp
+                                enemy2.mp = enemy2.max_mp
                             fighter_turn +=1
                             action_cooldown = 0
                 else:
@@ -334,7 +337,7 @@ def bossfight(hero=None):
             if fighter_turn > total_fighter:
                 fighter_turn = 1
 
-            if not boss.alive:
+            if not enemy2.alive:
                 game_over = 1
         
                 
@@ -345,7 +348,5 @@ def bossfight(hero=None):
         if keys[pygame.K_SPACE]:
             rpg.game(hero)
         if keys[pygame.K_a]: #relancer le combat
-            return bossfight
+            return second_fight
 
-
-    

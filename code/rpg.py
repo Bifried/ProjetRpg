@@ -1,6 +1,7 @@
 
 # import pygame module in this program 
 import Battle
+import Battle2
 import Bossbattle
 import pygame
 from pygame import mixer
@@ -13,27 +14,26 @@ def game(hero=Battle.Fighter(330, 260, 'Hero', 100, 16, 3, 5, 250, None, None)):
 #activation de pygame
     pygame.init()
     
-    print("Déplacez vous via les flèches directionnelles ! Touche echap pour quitter")
     #création de la fenêtre  
     win = pygame.display.set_mode((900, 600))  
     
     #coordonée des personnages,
     #perso
     x = 200
-    y = 200
+    y = 100
 #ennemi1
-    x2 = 500
-    y2 = 300
+    x2 = 100
+    y2 = 490
 #enemy 2
-    x3 = 100
-    y3 = 500
+    x3 = 500
+    y3 = 400
 #boss
     x4 = 800
-    y4 = 100
+    y4 = 500
 
 #pnj
-    x5 = 300
-    y5 = 300
+    x5 = 200
+    y5 = 250
     
     #dimension du personnage
     width = 30
@@ -69,11 +69,11 @@ def game(hero=Battle.Fighter(330, 260, 'Hero', 100, 16, 3, 5, 250, None, None)):
         hero_rect.center = (x, y)
 
         enemy = pygame.image.load("images/enemy.png") 
-        enemy_small = pygame.transform.scale(enemy,(90,90))  
+        enemy_small = pygame.transform.scale(enemy,(70,70))  
         enemy_rect = enemy.get_rect()
         enemy_rect.center = (x2, y2)
 
-        enemy2 = pygame.image.load("images/enemy.png") 
+        enemy2 = pygame.image.load("images/enemy2.png") 
         enemy2_small = pygame.transform.scale(enemy2,(90,90))  
         enemy2_rect = enemy2.get_rect()
         enemy2_rect.center = (x3, y3)
@@ -140,9 +140,10 @@ def game(hero=Battle.Fighter(330, 260, 'Hero', 100, 16, 3, 5, 250, None, None)):
             mixer.music.stop()
             main_menu()
         #lancement d'un combat en fonction de l'ennemi avec lequel le joueur à une collision
-        if hero_rect.colliderect(enemy_rect) or hero_rect.colliderect(enemy2_rect):
+        if hero_rect.colliderect(enemy_rect):
             Battle.fight(hero)
-
+        elif hero_rect.colliderect(enemy2_rect):
+            Battle2.second_fight(hero)
         elif hero_rect.colliderect(enemy3_rect):
             Bossbattle.bossfight(hero)
         

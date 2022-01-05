@@ -110,7 +110,6 @@ class Fighter():
                 self.frame_index = len(self.animation_list[self.action]) - 1
             elif self.action == 5:
                 self.frame_index = len(self.animation_list[self.action]) - 1
-                pygame.quit()
                 if frombattle == "battle":
                    rpg.game(self)
                 elif frombattle == "bossbattle":
@@ -154,13 +153,31 @@ class Fighter():
         self.action = 5
         self.frame_index = 0
         self.update_time = pygame.time.get_ticks()
-        self.level += 5
-        self.strenght += 5
-        self.max_hp += 100
-        self.hp = self.max_hp
-        self.max_mp += 10
-        self.mp = self.max_mp
-        return self.level
+        if self.enemy.level == 5:
+            self.level += 5
+            self.strenght += 5
+            self.max_hp += 100
+            self.hp = self.max_hp
+            self.max_mp += 10
+            self.mp = self.max_mp
+        elif self.enemy.level == 15:
+            self.level += 7
+            self.strenght += 7
+            self.max_hp += 170
+            self.hp = self.max_hp
+            self.max_mp += 17
+            self.mp = self.max_mp    
+        elif self.enemy.level >=25:
+            self.level += 10
+            self.strenght += 10
+            self.max_hp += 200
+            self.hp = self.max_hp
+            self.max_mp += 20
+            self.mp = self.max_mp           
+        drop = randint(0,4)
+        self.potions = self.potions + drop
+        if self.potions >= 3:
+           self.potions = 3
         
 
         #Fonction servant à calculer les dégats d'une attaque
@@ -321,7 +338,7 @@ def fight(hero=None):
     
 #variables de la classe fighters, le héro et l'ennemi
  #positionnement du personnage, son nom, ses hp, sa force, son nombre de potion et son lvl
-    enemy = Fighter(-50, 85, 'Enemy', 120, 6, 1, 5, 250, screen)
+    enemy = Fighter(-50, 85, 'Enemy', 120, 13, 1, 5, 250, screen)
 
     if hero is None:
         hero = Fighter(330, 260, 'Hero', 100, 16, 3, 5, 250, screen, enemy)
@@ -398,10 +415,12 @@ def fight(hero=None):
                screen.blit(victory_img, (330, 50))
             if game_over == -1:
                 screen.blit(defeat_img, (360, 50))
+                rpg.game(hero)
 #condition de clique et de fermeture de la fenêtre
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 run = False
+                pygame.quit()
             if event.type == pygame.MOUSEBUTTONDOWN:
                 clicked = True
             else:
