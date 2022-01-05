@@ -1,17 +1,209 @@
-
+from pygame import mixer
+from random import randint
+import credits
+import pygame
 
 
 #Fonction de combat qui sera appelée lors d'une collision avec un ennemi
 #j'ai mieux détaillé dans le combat de boss c'est globalement la même chose avec des images différentes et des chiffres moins gros dans la partie de dgts etc pck les perso' sont sensés être plus bas lvl
 
+#Création d'une classe avec plusieurs attributs pour les personnages du combat:
+#Les coordonnées du personnages, son nom, ses hp max, sa force, son nombre de potion et son level
+class Fighter():
+    def __init__(self, x, y, name, max_hp, strenght, potions, level, max_mp, screen, enemy=None):
+        self.name = name
+        self.max_hp = max_hp
+        self.hp = max_hp
+        self.strenght = strenght
+        self.level = level
+        self.max_mp = max_mp
+        self.mp = max_mp
+        self.start_potions = potions
+        self.potions = potions
+        self.screen = screen
+        self.enemy = enemy
+        self.alive = True
+        self.animation_list = []
+        self.frame_index = 0
+        self.action = 0 #0 pour l'animation de base, 1 pour l'attaque, 2 pour dégats reçu, 3 pour heal, 4 pour mort, 5 pour win, 6 pour special
+        self.update_time = pygame.time.get_ticks()
+
+        #Images d'animation de base
+        temp_list = []
+        for i in range(8):
+            img = pygame.image.load(f'images/{self.name}/Idle/{i}.png')
+            img = pygame.transform.scale(img, (img.get_width()*2, img.get_height()*2))
+            temp_list.append(img)
+        self.animation_list.append(temp_list)
+
+        #Images d'animations d'attaque
+        temp_list = []
+        for i in range(8):
+            img = pygame.image.load(f'images/{self.name}/Attack/{i}.png')
+            img = pygame.transform.scale(img, (img.get_width()*2, img.get_height()*2))
+            temp_list.append(img)
+        self.animation_list.append(temp_list)
+
+        #Images d'animations de dégats reçus
+        temp_list = []
+        for i in range(8):
+            img = pygame.image.load(f'images/{self.name}/Hurt/{i}.png')
+            img = pygame.transform.scale(img, (img.get_width()*2, img.get_height()*2))
+            temp_list.append(img)
+        self.animation_list.append(temp_list)
+
+        #Images d'animations de heal(potion)
+        temp_list = []
+        for i in range(6):
+            img = pygame.image.load(f'images/{self.name}/Heal/{i}.png')
+            img = pygame.transform.scale(img, (img.get_width()*2, img.get_height()*2))
+            temp_list.append(img)
+        self.animation_list.append(temp_list)
+
+        #Images d'animations de mort
+        temp_list = []
+        for i in range(5):
+            img = pygame.image.load(f'images/{self.name}/Death/{i}.png')
+            img = pygame.transform.scale(img, (img.get_width()*2, img.get_height()*2))
+            temp_list.append(img)
+        self.animation_list.append(temp_list)
 
 
-def fight():
-    from pygame import mixer
-    from random import randint
+        #Images d'animations de victoire
+        temp_list = []
+        for i in range(13):
+            img = pygame.image.load(f'images/Hero/Win/{i}.png')
+            img = pygame.transform.scale(img, (img.get_width()*2, img.get_height()*2))
+            temp_list.append(img)
+        self.animation_list.append(temp_list)
+
+        self.image = self.animation_list[self.action][self.frame_index]
+        self.rect = self.image.get_rect()
+        self.rect.center = (x, y)
+
+        #Images d'animations d'attaque spéciale
+        temp_list = []
+        for i in range(30):
+            img = pygame.image.load(f'images/{self.name}/Special/{i}.png')
+            img = pygame.transform.scale(img, (img.get_width()*2, img.get_height()*2))
+            temp_list.append(img)
+        self.animation_list.append(temp_list)
+
+        #Images d'animations de dgts d'attaque spéciale
+        temp_list = []
+        for i in range(29):
+            img = pygame.image.load(f'images/{self.name}/HurtSpecial/{i}.png')
+            img = pygame.transform.scale(img, (img.get_width()*2, img.get_height()*2))
+            temp_list.append(img)
+        self.animation_list.append(temp_list)
     
-    import pygame
+
+    def update(self, frombattle="battle"):
+        import rpg
+        animation_cooldown = 100
+        self.image = self.animation_list[self.action][self.frame_index]
+        if pygame.time.get_ticks() - self.update_time > animation_cooldown:
+            self.update_time = pygame.time.get_ticks()
+            self.frame_index += 1
+        if self.frame_index >= len(self.animation_list[self.action]):
+            if self.action == 4:
+                self.frame_index = len(self.animation_list[self.action]) - 1
+            elif self.action == 5:
+                self.frame_index = len(self.animation_list[self.action]) - 1
+                pygame.quit()
+                if frombattle == "battle":
+                   rpg.game(self)
+                elif frombattle == "bossbattle":
+                    credits.credits()
+    
+            else:
+                self.idle()
+
+
+        #Fonction servant à créer un carré remplit par une image qui correspond à l'emplacement du personnage
+    def draw(self):
+        self.screen.blit(self.image, self.rect)
+
+    def idle(self):
+        self.action = 0
+        self.frame_index = 0
+        self.update_time = pygame.time.get_ticks()
+        if self.enemy is not None:
+            win_condition = self.alive == True and self.enemy.alive == False
+            if win_condition == True:
+                self.win()
+                
+
+    def hurt(self):
+        self.action = 2
+        self.frame_index = 0
+        self.update_time = pygame.time.get_ticks()
+
+    def heal(self):
+        self.action = 3
+        self.frame_index = 0
+        self.update_time = pygame.time.get_ticks()
+
+    def death(self):
+        self.action = 4
+        self.frame_index = 0
+        self.update_time = pygame.time.get_ticks()
+
+
+    def win(self):
+        self.action = 5
+        self.frame_index = 0
+        self.update_time = pygame.time.get_ticks()
+        self.level += 5
+        self.strenght += 5
+        self.max_hp += 100
+        self.hp = self.max_hp
+        self.max_mp += 10
+        self.mp = self.max_mp
+        return self.level
+        
+
+        #Fonction servant à calculer les dégats d'une attaque
+    def attack(self, target):
+        rand = randint(-5, 5) #Pour créer un combat avec + de tension les dégats infligés sont déterminé par un calcul de la force du personnage -5 ou +5 aléatoirement
+        damage = self.strenght + rand
+        target.hp -= damage
+        target.hurt()
+        if target.hp <1:
+            target.hp = 0
+            target.alive = False
+            target.death()
+        self.action = 1
+        self.frame_index = 0
+        self.update_time = pygame.time.get_ticks()
+
+        #Fonction servant à calculer les dégats d'une attaque spéciale
+    def special(self, target):
+        rand = randint(-5, 5) #Pour créer un combat avec + de tension les dégats infligés sont déterminé par un calcul de la force du personnage -5 ou +5 aléatoirement
+        special = 2
+        damage = (self.strenght + rand) *special
+        target.hp -= damage
+        target.hurt_special()
+        if target.hp <1:
+            target.hp = 0
+            target.alive = False
+            target.death()
+        self.action = 6
+        self.frame_index = 0
+        self.update_time = pygame.time.get_ticks()
+
+    def hurt_special(self):
+        self.action = 7
+        self.frame_index = 0
+        self.update_time = pygame.time.get_ticks()
+
+
+
+
+
+def fight(hero=None):
     import rpg
+
     pygame.init()
     
 #Variables pour l'UI de combat
@@ -30,7 +222,7 @@ def fight():
     action_wait_time = 100 #Pareil
     attack = False #Action attaqué (on démarre par un boolean faux pour l'activer lors d'un clique)
     potion = False #Action potion (pareil)
-    potion_heal = 50 #La quantité de soin d'une potion
+    potion_heal = 100 #La quantité de soin d'une potion
     target = None #Cible lors d'une attaque (peux servir également lorsque l'on voudra mettre plusieurs ennemis)
     special = False
     hero_mana_restored = 10
@@ -68,184 +260,6 @@ def fight():
     victory_img = pygame.image.load('images/victory.png').convert_alpha()
 
     defeat_img = pygame.image.load('images/defeat.png').convert_alpha()
-
-#Création d'une classe avec plusieurs attributs pour les personnages du combat:
-#Les coordonnées du personnages, son nom, ses hp max, sa force, son nombre de potion et son level
-        
-    class Fighter():
-        def __init__(self, x, y, name, max_hp, strenght, potions, level, max_mp):
-            self.name = name
-            self.max_hp = max_hp
-            self.hp = max_hp
-            self.strenght = strenght
-            self.level = level
-            self.max_mp = max_mp
-            self.mp = max_mp
-            self.start_potions = potions
-            self.potions = potions
-            self.alive = True
-            self.animation_list = []
-            self.frame_index = 0
-            self.action = 0 #0 pour l'animation de base, 1 pour l'attaque, 2 pour dégats reçu, 3 pour heal, 4 pour mort, 5 pour win, 6 pour special
-            self.update_time = pygame.time.get_ticks()
-
-#Images d'animation de base
-            temp_list = []
-            for i in range(8):
-                img = pygame.image.load(f'images/{self.name}/Idle/{i}.png')
-                img = pygame.transform.scale(img, (img.get_width()*2, img.get_height()*2))
-                temp_list.append(img)
-            self.animation_list.append(temp_list)
-
-#Images d'animations d'attaque
-            temp_list = []
-            for i in range(8):
-                img = pygame.image.load(f'images/{self.name}/Attack/{i}.png')
-                img = pygame.transform.scale(img, (img.get_width()*2, img.get_height()*2))
-                temp_list.append(img)
-            self.animation_list.append(temp_list)
-
-#Images d'animations de dégats reçus
-            temp_list = []
-            for i in range(8):
-                img = pygame.image.load(f'images/{self.name}/Hurt/{i}.png')
-                img = pygame.transform.scale(img, (img.get_width()*2, img.get_height()*2))
-                temp_list.append(img)
-            self.animation_list.append(temp_list)
-
- #Images d'animations de heal(potion)
-            temp_list = []
-            for i in range(6):
-                img = pygame.image.load(f'images/{self.name}/Heal/{i}.png')
-                img = pygame.transform.scale(img, (img.get_width()*2, img.get_height()*2))
-                temp_list.append(img)
-            self.animation_list.append(temp_list)
-
- #Images d'animations de mort
-            temp_list = []
-            for i in range(5):
-                img = pygame.image.load(f'images/{self.name}/Death/{i}.png')
-                img = pygame.transform.scale(img, (img.get_width()*2, img.get_height()*2))
-                temp_list.append(img)
-            self.animation_list.append(temp_list)
-
-
-#Images d'animations de victoire
-            temp_list = []
-            for i in range(13):
-                img = pygame.image.load(f'images/Hero/Win/{i}.png')
-                img = pygame.transform.scale(img, (img.get_width()*2, img.get_height()*2))
-                temp_list.append(img)
-            self.animation_list.append(temp_list)
-
-            self.image = self.animation_list[self.action][self.frame_index]
-            self.rect = self.image.get_rect()
-            self.rect.center = (x, y)
-
-#Images d'animations d'attaque spéciale
-            temp_list = []
-            for i in range(30):
-                img = pygame.image.load(f'images/{self.name}/Special/{i}.png')
-                img = pygame.transform.scale(img, (img.get_width()*2, img.get_height()*2))
-                temp_list.append(img)
-            self.animation_list.append(temp_list)
-
-#Images d'animations de dgts d'attaque spéciale
-            temp_list = []
-            for i in range(29):
-                img = pygame.image.load(f'images/{self.name}/HurtSpecial/{i}.png')
-                img = pygame.transform.scale(img, (img.get_width()*2, img.get_height()*2))
-                temp_list.append(img)
-            self.animation_list.append(temp_list)
-        
-
-        def update(self):
-            animation_cooldown = 100
-            self.image = self.animation_list[self.action][self.frame_index]
-            if pygame.time.get_ticks() - self.update_time > animation_cooldown:
-                self.update_time = pygame.time.get_ticks()
-                self.frame_index += 1
-            if self.frame_index >= len(self.animation_list[self.action]):
-                if self.action == 4:
-                    self.frame_index = len(self.animation_list[self.action]) - 1
-                elif self.action == 5:
-                    self.frame_index = len(self.animation_list[self.action]) - 1
-     
-                else:
-                    self.idle()
-
-
-#Fonction servant à créer un carré remplit par une image qui correspond à l'emplacement du personnage
-        def draw(self):
-            screen.blit(self.image, self.rect)
-
-        def idle(self):
-            self.action = 0
-            self.frame_index = 0
-            self.update_time = pygame.time.get_ticks()
-            win_condition = hero.alive == True and enemy.alive == False
-            if win_condition == True:
-                hero.win()
-
-        def hurt(self):
-            self.action = 2
-            self.frame_index = 0
-            self.update_time = pygame.time.get_ticks()
-
-        def heal(self):
-            self.action = 3
-            self.frame_index = 0
-            self.update_time = pygame.time.get_ticks()
-
-        def death(self):
-            self.action = 4
-            self.frame_index = 0
-            self.update_time = pygame.time.get_ticks()
-
-        
-
-        def win(self):
-            self.action = 5
-            self.frame_index = 0
-            self.update_time = pygame.time.get_ticks()
-            hero.level += 5
-            return hero.level
-
-#Fonction servant à calculer les dégats d'une attaque
-        def attack(self, target):
-            rand = randint(-5, 5) #Pour créer un combat avec + de tension les dégats infligés sont déterminé par un calcul de la force du personnage -5 ou +5 aléatoirement
-            damage = self.strenght + rand
-            target.hp -= damage
-            target.hurt()
-            if target.hp <1:
-                target.hp = 0
-                target.alive = False
-                target.death()
-            self.action = 1
-            self.frame_index = 0
-            self.update_time = pygame.time.get_ticks()
-
-#Fonction servant à calculer les dégats d'une attaque spéciale
-        def special(self, target):
-            rand = randint(-5, 5) #Pour créer un combat avec + de tension les dégats infligés sont déterminé par un calcul de la force du personnage -5 ou +5 aléatoirement
-            special = 2
-            damage = (self.strenght + rand) *special
-            target.hp -= damage
-            target.hurt_special()
-            if target.hp <1:
-                target.hp = 0
-                target.alive = False
-                target.death()
-            self.action = 6
-            self.frame_index = 0
-            self.update_time = pygame.time.get_ticks()
-
-        def hurt_special(self):
-            self.action = 7
-            self.frame_index = 0
-            self.update_time = pygame.time.get_ticks()
-
-
 
 #Création de la classe des barre de vie, requiert une position un nombre actuel de hp et les hp max
     class HealthBar():
@@ -306,8 +320,21 @@ def fight():
 
     
 #variables de la classe fighters, le héro et l'ennemi
-    hero = Fighter(330, 260, 'Hero', 100, 16, 3, 5, 250) #positionnement du personnage, son nom, ses hp, sa force, son nombre de potion et son lvl
-    enemy = Fighter(-50, 85, 'Enemy', 120, 6, 1, 5, 250)
+ #positionnement du personnage, son nom, ses hp, sa force, son nombre de potion et son lvl
+    enemy = Fighter(-50, 85, 'Enemy', 120, 6, 1, 5, 250, screen)
+
+    if hero is None:
+        hero = Fighter(330, 260, 'Hero', 100, 16, 3, 5, 250, screen, enemy)
+
+    hero.screen = screen
+    hero.enemy = enemy
+    hero.hp = hero.max_hp
+    hero.mp = hero.max_mp
+    hero.alive = True
+    hero.frame_index = 0
+    hero.action = 0 #0 pour l'animation de base, 1 pour l'attaque, 2 pour dégats reçu, 3 pour heal, 4 pour mort, 5 pour win, 6 pour special
+    hero.update_time = pygame.time.get_ticks()
+    
 #variables de la classe barre de vie, la vie du héro et la vie de l'ennemi
     hero_health_bar = HealthBar(100, screen_height - bottom_panel + 45, hero.hp, hero.max_hp)
     enemy_health_bar = HealthBar(500, screen_height - bottom_panel + 45, enemy.hp, enemy.max_hp)
@@ -506,21 +533,18 @@ def fight():
             if fighter_turn > total_fighter:
                 fighter_turn = 1
 
-            alive_enemy = 0
-            if enemy.alive == True:
-                alive_enemy += 1
-            
-            if alive_enemy == 0:
+            if not enemy.alive:
                 game_over = 1
+        
                 
+            
             #Mouvement du personnage via les touches que l'utilisateur presse
         keys = pygame.key.get_pressed()
         #Lancement de l'écran aventure si barre espace est utilisée
         if keys[pygame.K_SPACE]:
-            rpg.game()
+            rpg.game(hero)
         if keys[pygame.K_a]: #relancer le combat
             return fight
-    pygame.quit()
-           
+
 
     

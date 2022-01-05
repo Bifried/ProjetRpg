@@ -1,12 +1,14 @@
 
-def game():
-    # import pygame module in this program 
-    import Battle
-    import Bossbattle
-    import pygame
+# import pygame module in this program 
+import Battle
+import Bossbattle
+import pygame
+from pygame import mixer
+from random import randint
+
+def game(hero=Battle.Fighter(330, 260, 'Hero', 100, 16, 3, 5, 250, None, None)):
     from menu import main_menu
-    from pygame import mixer
-    from random import randint
+
 
 #activation de pygame
     pygame.init()
@@ -61,9 +63,9 @@ def game():
 
         #affichage des images et création de rectangle de collision à partir des images pour chaque personnages
         
-        hero = pygame.image.load("images/character.png") 
-        hero_small = pygame.transform.scale(hero,(60,60))  
-        hero_rect = hero.get_rect()
+        hero_img = pygame.image.load("images/character.png") 
+        hero_small = pygame.transform.scale(hero_img,(60,60))  
+        hero_rect = hero_img.get_rect()
         hero_rect.center = (x, y)
 
         enemy = pygame.image.load("images/enemy.png") 
@@ -139,10 +141,10 @@ def game():
             main_menu()
         #lancement d'un combat en fonction de l'ennemi avec lequel le joueur à une collision
         if hero_rect.colliderect(enemy_rect) or hero_rect.colliderect(enemy2_rect):
-            Battle.fight()
+            Battle.fight(hero)
 
         elif hero_rect.colliderect(enemy3_rect):
-            Bossbattle.bossfight()
+            Bossbattle.bossfight(hero)
         
         if hero_rect.colliderect(pnj_rect):
             win.blit(dialog, (0, 400, 0, 0))
