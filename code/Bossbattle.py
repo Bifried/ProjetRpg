@@ -27,8 +27,8 @@ def bossfight(hero=None):
     potion_heal = 100 #La quantité de soin d'une potion
     target = None #Cible lors d'une attaque (peux servir également lorsque l'on voudra mettre plusieurs ennemis)
     special = False
-    hero_mana_restored = 10
-    boss_mana_restored = 20
+    hero_mana_restored = 15
+    boss_mana_restored = 30
     game_over = 0 #Variable pour la condition de fin du combat
 
 #Variables pour la police de texte et les deux couleurs principalement utilisé lors du combat (pour le text et les barres de vie)
@@ -60,7 +60,8 @@ def bossfight(hero=None):
 
     victory_img = pygame.image.load('images/victory.png').convert_alpha()
 
-    defeat_img = pygame.image.load('images/defeat.png').convert_alpha()
+    defeat_img = pygame.image.load('images/game_over.png').convert_alpha()
+
 
 #Création de la classe des barre de vie, requiert une position un nombre actuel de hp et les hp max
     class HealthBar():
@@ -122,7 +123,7 @@ def bossfight(hero=None):
     
 #variables de la classe fighters, le héro et l'ennemi
  #positionnement du personnage, son nom, ses hp, sa force, son nombre de potion et son lvl
-    boss = Fighter(-480, 283, 'Boss', 700, 40, 2, 25, 250, screen)
+    boss = Fighter(-480, 283, 'Boss', 700, 40, 2, 30, 300, screen)
 
     if hero is None:
         hero = Fighter(330, 260, 'Hero', 100, 16, 3, 5, 250, screen, boss)
@@ -198,7 +199,7 @@ def bossfight(hero=None):
             if game_over == 1:
                screen.blit(victory_img, (330, 50))
             if game_over == -1:
-                screen.blit(defeat_img, (360, 50))
+                screen.blit(defeat_img, (0, 100))
 #condition de clique et de fermeture de la fenêtre
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
