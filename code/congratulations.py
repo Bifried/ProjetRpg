@@ -32,7 +32,7 @@ def congratulations():
             if keys[pygame.K_SPACE]:
                 main_menu()
 
-        #Remplissage du fond avec l'image de crédits en plein écran
+        #Remplissage du fond avec l'image de jeu terminé en plein écran
         background = pygame.image.load("images/congratulations.png")
         win.blit(background,(0,0))
 

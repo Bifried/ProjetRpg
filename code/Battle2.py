@@ -3,7 +3,7 @@ from random import randint
 import credits
 import pygame
 from Battle import Fighter
-
+#commentaires moins détaillés, plus clair dans Battle.py
 def second_fight(hero=None):
     import rpg
 

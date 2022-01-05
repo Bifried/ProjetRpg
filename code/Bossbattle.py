@@ -2,7 +2,7 @@ from pygame import mixer
 from random import randint
 import pygame
 from Battle import Fighter
-
+#commentaires mal détaillé par manque de temps, mieux détaillés dans Battle.py
 def bossfight(hero=None):
     import rpg
 

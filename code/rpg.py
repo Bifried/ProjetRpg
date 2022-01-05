@@ -7,7 +7,7 @@ import pygame
 from pygame import mixer
 from random import randint
 
-def game(hero=Battle.Fighter(330, 260, 'Hero', 100, 16, 3, 5, 250, None, None)):
+def game(hero=Battle.Fighter(330, 260, 'Hero', 100, 16, 3, 5, 250, None, None)): #pour garder les stats du joueurs après un combats
     from menu import main_menu
 
 
@@ -17,7 +17,7 @@ def game(hero=Battle.Fighter(330, 260, 'Hero', 100, 16, 3, 5, 250, None, None)):
     #création de la fenêtre  
     win = pygame.display.set_mode((900, 600))  
     
-    #coordonée des personnages,
+    #coordonées des personnages,
     #perso
     x = 200
     y = 100
